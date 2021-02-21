@@ -16,7 +16,7 @@ async def dice(app: Mirai, group: Group, message: GroupMessage):
         sender: Member = message.sender
         source: Source = message.messageChain.getSource()
         throw = msg_str[msg_str.index('roll'):].lstrip("roll")
-        pattern = re.compile(r'\s*((?P<count>[0-9]*)\s*([dD]))?\s*(?P<sides>[0-9]+)$')
+        pattern = re.compile(r'\s*((?P<count>[0-9]*)\s*[dD])?\s*(?P<sides>[0-9]+)$')
         match = re.match(pattern, throw)
         if match:
             count = int(match.group('count')) if match.group('count') else 1
