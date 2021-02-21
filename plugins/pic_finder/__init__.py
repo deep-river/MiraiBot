@@ -25,7 +25,7 @@ async def do_search(url: str):
     s_info = await get_saucenao_detail(s_url)
 
     if s_info and percent_to_int(s_info[0]['Similarity']) > 0.7:
-        msg = ''
+        msg = 'SauceNAO搜图结果：\n'
         for k, v in s_info[0].items():
             if k != 'Content':
                 msg += f'{k}: {v}\n'
@@ -33,11 +33,12 @@ async def do_search(url: str):
                 msg += f'{v}\n'
         return msg.strip()
     else:
-        info = await get_ascii2d_detail(encoded_url)
+        page_url, info = await get_ascii2d_detail(encoded_url)
         if info:
-            msg = ''
+            msg = 'ascii2d搜图结果：\n'
             for k, v in info[0].items():
                 msg += f'{k}: {v}\n'
+            msg += f'如以上内容不符，请尝试手动打开如下链接，并点选\"特徴検索\"以获取更多结果:\n {page_url}'
         else:
             msg = '未找到相似图片\n'
         return msg.strip()
@@ -96,8 +97,9 @@ async def get_ascii2d_detail(url):
     #     async with session.get(url) as resp:
     #         text = await resp.text(encoding='utf8')
 
-    resp = urllib.request.urlopen(url)
-    text = resp.read().decode()
+    async with urllib.request.urlopen(url) as resp:
+        page_url = await resp.url
+        text = await resp.read().decode()
     html_e: lxml.html.HtmlElement = lxml.html.fromstring(text)
     item_box = html_e.xpath('//div[@class="row item-box"][2]')
     if not item_box:
@@ -114,7 +116,7 @@ async def get_ascii2d_detail(url):
             'Author': author
         }
     ]
-    return results
+    return page_url, results
 
 
 def url_encoder(url):
